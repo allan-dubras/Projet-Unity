@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Rigidbody2D rb; // On Déclare le rigibody2D 
     [SerializeField] private Vector2 moveInput; // C'est le Raw input receptionné depuis la manette
     [SerializeField] private float speed = 10; // Déclaration de la variable speed pour les mouvements du joueur
+    [SerializeField] private float speedSprint = 15; // Déclaration de la variable speed pour les mouvements du joueur
     [SerializeField] private float endurance = 100; // Déclaration de la variable speed pour les mouvements du joueur
     [SerializeField] private Slider enduranceSlider;
 
@@ -26,6 +27,7 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+
         enduranceSlider = FindObjectOfType<Slider>();
         //On Initialise le playercontrol et le rigidbody2d
         controls = new PlayerControl();
@@ -37,6 +39,8 @@ public class PlayerController : MonoBehaviour
         controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();  //lambda expression
         controls.Player.Move.canceled += ctx => moveInput = Vector2.zero;
 
+ 
+
         //Inscrit le Jump
         controls.Player.Jump.performed += ctx => Jump();
 
@@ -47,6 +51,7 @@ public class PlayerController : MonoBehaviour
     {
         controls.Disable();
     }
+
     private void Jump()
     {
         if (isGrounded && endurance >= 10)
@@ -63,9 +68,21 @@ public class PlayerController : MonoBehaviour
         {
             endurance = 100;
         }
-       transform.Translate(moveInput.x * speed * Time.deltaTime, 0, 0);
         isGrounded = CheckCollision(Vector2.down, player, distance, Ground);
+        Vector2 move = controls.Player.Move.ReadValue<Vector2>();
+
+
+        bool isSprinting = controls.Player.Sprint.IsPressed() && endurance > 0 && move != Vector2.zero;
+        float currentSpeed = isSprinting ? speedSprint : speed;
+        transform.Translate(move.x * currentSpeed * Time.deltaTime, 0, 0);
+        if (isSprinting)
+        {
+            endurance -= 20 * Time.deltaTime; 
+        }
     }
+
+    
+
     private bool CheckCollision(Vector2 direction, Transform checkPoint, float distance, LayerMask layerMask)
     {
         RaycastHit2D hit = Physics2D.Raycast(checkPoint.position, direction, distance, layerMask);  // Affiche le raycast en rouge s'il ne touche rien, en vert s'il touche le sol

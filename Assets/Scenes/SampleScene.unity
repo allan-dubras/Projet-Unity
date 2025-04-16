@@ -1402,8 +1402,10 @@ MonoBehaviour:
   rb: {fileID: 1778064457}
   moveInput: {x: 0, y: 0}
   speed: 10
+  speedSprint: 30
   endurance: 100
   enduranceSlider: {fileID: 0}
+  wait: 0
   JumpForce: 6
   isGrounded: 0
   Ground:
