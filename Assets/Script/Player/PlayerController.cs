@@ -13,7 +13,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float speedSprint = 15; // Déclaration de la variable speed pour les mouvements du joueur
     [SerializeField] private float endurance = 100; // Déclaration de la variable speed pour les mouvements du joueur
     [SerializeField] private Slider enduranceSlider;
-
+    [SerializeField] private Animator animator;
 
 
     [Header("Saut")]
@@ -39,7 +39,7 @@ public class PlayerController : MonoBehaviour
         controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();  //lambda expression
         controls.Player.Move.canceled += ctx => moveInput = Vector2.zero;
 
- 
+
 
         //Inscrit le Jump
         controls.Player.Jump.performed += ctx => Jump();
@@ -59,10 +59,16 @@ public class PlayerController : MonoBehaviour
             //on multiplie le vecteur par une jumpforce et on mets un ForceMode2D en impulse
             rb.AddForce(new Vector2(0, 1) * JumpForce, ForceMode2D.Impulse);
             endurance -= 10;
+            animator.SetBool("isJumping", true);
         }
+
     }
     private void Update()
     {
+        if (!isGrounded) 
+        {
+            animator.SetBool("isJumping", false);
+        }
         enduranceSlider.value = endurance;
         if (endurance > 100)
         {
@@ -71,17 +77,29 @@ public class PlayerController : MonoBehaviour
         isGrounded = CheckCollision(Vector2.down, player, distance, Ground);
         Vector2 move = controls.Player.Move.ReadValue<Vector2>();
 
-
         bool isSprinting = controls.Player.Sprint.IsPressed() && endurance > 0 && move != Vector2.zero;
         float currentSpeed = isSprinting ? speedSprint : speed;
         transform.Translate(move.x * currentSpeed * Time.deltaTime, 0, 0);
         if (isSprinting)
         {
-            endurance -= 20 * Time.deltaTime; 
+            endurance -= 20 * Time.deltaTime;
+            animator.SetBool("isSprint", true);
+        }
+        else
+        {
+            animator.SetBool("isSprint", false);
+        }
+        if (moveInput.x != 0 && !isSprinting)
+        {
+            animator.SetBool("isWalking", true);
+        }
+        else
+        {
+            animator.SetBool("isWalking", false);
         }
     }
 
-    
+
 
     private bool CheckCollision(Vector2 direction, Transform checkPoint, float distance, LayerMask layerMask)
     {
