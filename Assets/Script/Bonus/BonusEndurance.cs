@@ -16,6 +16,17 @@ public class BonusEndurance : MonoBehaviour
     IEnumerator wait()
     {
         yield return new WaitForSeconds(1f);
-        Destroy(this.gameObject);
+        this.gameObject.GetComponent<Collider2D>().enabled = false;
+        this.gameObject.GetComponent<SpriteRenderer>().enabled = false;
+        animator.SetBool("ispick", false);
+        StartCoroutine(respawn());
     }
+    IEnumerator respawn()
+    {
+        yield return new WaitForSeconds(1f);
+        this.gameObject.GetComponent<Collider2D>().enabled = true;
+        this.gameObject.GetComponent<SpriteRenderer>().enabled = true;
+    }
+
+
 }
